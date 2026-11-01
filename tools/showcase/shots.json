@@ -1,0 +1,358 @@
+{
+ "_": "What tools/showcase/shoot.py films. show = options for mock-showcase.js (the playing queue: albums in order, the first track).",
+ "show": {
+  "playlist": [
+   "Cold Wave",
+   "Calls and Echoes",
+   "Slam Funk",
+   "Ghosts I–IV",
+   "Dune",
+   "Let's Die Together in 2012",
+   "Nylon & Turtle"
+  ],
+  "playlistName": "Late night"
+ },
+ "screens": [
+  {
+   "name": "now-en",
+   "steps": [
+    {
+     "js": "window.__setAlbum('Cold Wave')",
+     "wait": 2500
+    },
+    {
+     "nav": "now",
+     "wait": 2000
+    },
+    {
+     "until": "document.querySelectorAll('#npBadges .chip.ai').length > 0"
+    }
+   ]
+  },
+  {
+   "name": "sound-smart-en",
+   "steps": [
+    {
+     "nav": "playlist",
+     "wait": 1500
+    },
+    {
+     "js": "import('/theme/js/smartpl.js').then(m => m.open('ai-instrumental')).then(() => new Promise(r => setTimeout(r, 700))).then(() => { const l = document.querySelector('.sp-list'); l.scrollTop = l.scrollHeight; })",
+     "wait": 1500
+    }
+   ]
+  },
+  {
+   "name": "playlist-en",
+   "steps": [
+    {
+     "nav": "playlist",
+     "wait": 1200
+    },
+    {
+     "js": "document.querySelector('#plModes [data-m=covers]').click()",
+     "wait": 2500
+    }
+   ]
+  },
+  {
+   "name": "library-en",
+   "steps": [
+    {
+     "nav": "library",
+     "wait": 3500
+    }
+   ]
+  },
+  {
+   "name": "tracks-en",
+   "steps": [
+    {
+     "nav": "library",
+     "wait": 1500
+    },
+    {
+     "js": "document.querySelector('.lib-mode [data-m=tracks]').click()",
+     "wait": 3500
+    }
+   ]
+  },
+  {
+   "name": "folders-en",
+   "steps": [
+    {
+     "nav": "library",
+     "wait": 800
+    },
+    {
+     "js": "document.querySelector('.lib-mode [data-m=folders]').click()",
+     "wait": 3500
+    }
+   ]
+  },
+  {
+   "name": "colors-en",
+   "steps": [
+    {
+     "nav": "library",
+     "wait": 1500
+    },
+    {
+     "js": "(async () => { const s = document.querySelector('#libSort'); s.value = 'color'; s.dispatchEvent(new Event('change')); await new Promise(r => setTimeout(r, 5000)); })()",
+     "wait": 1500
+    }
+   ]
+  },
+  {
+   "name": "smart-en",
+   "steps": [
+    {
+     "nav": "playlist",
+     "wait": 1500
+    },
+    {
+     "js": "import('/theme/js/smartpl.js').then(m => m.open('lossless'))",
+     "wait": 2000
+    }
+   ]
+  },
+  {
+   "name": "settings-en",
+   "steps": [
+    {
+     "nav": "settings",
+     "wait": 1500
+    },
+    {
+     "js": "document.getElementById('st-foobar').scrollIntoView({ block: 'start' })",
+     "wait": 1500
+    }
+   ]
+  },
+  {
+   "name": "now-light-en",
+   "settings": {
+    "colorSource": "light"
+   },
+   "steps": [
+    {
+     "js": "window.__setAlbum('Calls and Echoes')",
+     "wait": 2500
+    },
+    {
+     "nav": "now",
+     "wait": 2000
+    }
+   ]
+  },
+  {
+   "name": "now-ru",
+   "settings": {
+    "language": "ru"
+   },
+   "steps": [
+    {
+     "js": "window.__setAlbum('Slam Funk')",
+     "wait": 2500
+    },
+    {
+     "nav": "now",
+     "wait": 2000
+    }
+   ]
+  }
+ ],
+ "demo": {
+  "size": [
+   1280,
+   760
+  ],
+  "warmup": [
+   {
+    "nav": "playlist",
+    "wait": 600
+   },
+   {
+    "js": "document.querySelector('#plModes [data-m=covers]').click()",
+    "wait": 1500
+   },
+   {
+    "nav": "library",
+    "wait": 2500
+   },
+   {
+    "js": "document.querySelector('.lib-mode [data-m=folders]').click()",
+    "wait": 3000
+   },
+   {
+    "js": "document.querySelector('.lib-mode [data-m=albums]').click()",
+    "wait": 800
+   },
+   {
+    "js": "window.__setAlbum('Calls and Echoes')",
+    "wait": 800
+   },
+   {
+    "js": "window.__setAlbum('Slam Funk')",
+    "wait": 800
+   },
+   {
+    "js": "window.__setAlbum('Cold Wave')",
+    "wait": 1500
+   },
+   {
+    "nav": "now",
+    "wait": 1500
+   },
+   {
+    "until": "document.querySelectorAll('#npBadges .chip.ai').length > 0"
+   }
+  ],
+  "steps": [
+   {
+    "cap": "Gatefold — foobar2000, reimagined",
+    "hold": 2600
+   },
+   {
+    "cap": "Every screen takes its colours from what's playing",
+    "js": "window.__setAlbum('Calls and Echoes')",
+    "wait": 1900
+   },
+   {
+    "js": "window.__setAlbum('Slam Funk')",
+    "wait": 1900
+   },
+   {
+    "js": "window.__setAlbum('Cold Wave')",
+    "wait": 1600
+   },
+   {
+    "cap": "Your library as albums, every song, or your folders",
+    "nav": "library",
+    "wait": 1800
+   },
+   {
+    "js": "document.querySelector('.lib-mode [data-m=tracks]').click()",
+    "wait": 2300
+   },
+   {
+    "js": "document.querySelector('.lib-mode [data-m=folders]').click()",
+    "wait": 3400
+   },
+   {
+    "js": "document.querySelector('.lib-mode [data-m=albums]').click()",
+    "wait": 300
+   },
+   {
+    "cap": "Playlists by how your music sounds, analysed on your PC",
+    "nav": "playlist",
+    "wait": 300
+   },
+   {
+    "js": "import('/theme/js/smartpl.js').then(m => m.open('ai-calm'))",
+    "wait": 1800
+   },
+   {
+    "js": "(c => { c?.scrollIntoView({ block: 'nearest' }); c?.click(); })(document.querySelector('.sp-card[data-id=ai-instrumental]'))",
+    "wait": 1700
+   },
+   {
+    "js": "(c => { c?.scrollIntoView({ block: 'nearest' }); c?.click(); })(document.querySelector('.sp-card[data-id=ai-energy]'))",
+    "wait": 1700
+   },
+   {
+    "cap": "Smart playlists without the query language",
+    "js": "(c => { c?.scrollIntoView({ block: 'nearest' }); c?.click(); })(document.querySelector('.sp-card[data-id=lossless]'))",
+    "wait": 1700
+   },
+   {
+    "js": "(c => { c?.scrollIntoView({ block: 'nearest' }); c?.click(); })(document.querySelector('.sp-card[data-id=decade]'))",
+    "wait": 1500
+   },
+   {
+    "key": "Escape",
+    "wait": 500
+   },
+   {
+    "cap": "foobar2000 underneath: every format, gapless, DSP, your components",
+    "nav": "playlist",
+    "wait": 400
+   },
+   {
+    "js": "document.querySelector('#plModes [data-m=covers]').click()",
+    "wait": 2600
+   },
+   {
+    "cap": "And a full screen for when you just listen",
+    "nav": "now",
+    "wait": 600
+   },
+   {
+    "js": "document.querySelector('#btnFull').click()",
+    "wait": 2800
+   },
+   {
+    "cap": "",
+    "sleep": 400
+   }
+  ]
+ },
+ "seekbars": [
+  {
+   "album": "Cold Wave",
+   "prefs": {
+    "style": "bars"
+   },
+   "hover": 0.64,
+   "at": 0.38
+  },
+  {
+   "album": "Calls and Echoes",
+   "prefs": {
+    "style": "solid",
+    "cover": true,
+    "time": "remaining"
+   },
+   "size": [
+    1100,
+    56
+   ],
+   "at": 0.55
+  },
+  {
+   "album": "Slam Funk",
+   "prefs": {
+    "style": "bars",
+    "cover": true
+   },
+   "size": [
+    1100,
+    48
+   ],
+   "at": 0.3
+  },
+  {
+   "album": "Dune",
+   "prefs": {
+    "style": "bars",
+    "colors": "light"
+   },
+   "size": [
+    1100,
+    40
+   ],
+   "at": 0.7
+  },
+  {
+   "album": "Ghosts I–IV",
+   "prefs": {
+    "style": "line"
+   },
+   "size": [
+    1100,
+    34
+   ],
+   "at": 0.45
+  }
+ ]
+}

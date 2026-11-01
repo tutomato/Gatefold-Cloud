@@ -1,0 +1,7 @@
+{
+  "name": "gatefold-cloud-local",
+  "private": true,
+  "type": "module",
+  "scripts": { "start": "node server.mjs", "test": "node --test test.mjs" },
+  "dependencies": { "NeteaseCloudMusicApi": "4.32.0", "undici": "6.19.8" }
+}

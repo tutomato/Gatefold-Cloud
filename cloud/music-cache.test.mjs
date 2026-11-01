@@ -1,0 +1,10 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtemp, rm } from 'node:fs/promises';
+import path from 'node:path';
+import os from 'node:os';
+import { MusicCache, tagAudio } from './music-cache.mjs';
+const frames=Buffer.from('test audio frames');
+const flac=Buffer.concat([Buffer.from('fLaC'),Buffer.from([128,0,0,34]),Buffer.alloc(34),frames]);
+test('FLAC tags contain names and leave audio frames unchanged',()=>{const b=tagAudio(flac,'flac',{title:'歌名',artist:'歌手',album:'专辑'});assert.ok(b.includes(Buffer.from('TITLE=歌名')));assert.ok(b.includes(Buffer.from('ARTIST=歌手')));assert.deepEqual(b.subarray(-frames.length),frames);assert.throws(()=>tagAudio(Buffer.from('html'),'flac',{}));});
+test('second play and service restart use cache without resolving or downloading',async()=>{const dir=await mkdtemp(path.join(os.tmpdir(),'gatefold-cache-test-'));try{let downloads=0;const relay={async upstream(){downloads++;return new Response(flac);}};const c=new MusicCache(dir,relay);const p={id:'123',quality:'lossless',track:{title:'test'}};await c.prepare('qq',p,async()=>({url:'https://example.test',codec:'flac',quality:'lossless'}));const next=new MusicCache(dir,relay);const hit=await next.prepare('qq',p,()=>assert.fail('must not access provider'));assert.equal(hit.local,true);assert.equal(downloads,1);const duplicate=await next.prepare('qq',{...p,id:'456'},async()=>({url:'https://example.test',codec:'flac',quality:'lossless'}));assert.notEqual(duplicate.url,hit.url);assert.equal((await next.get('qq','123','lossless')).url,hit.url);assert.equal(await next.get('netease','123','lossless'),null);}finally{if(path.dirname(dir)!==os.tmpdir())throw new Error('Unexpected test path');await rm(dir,{recursive:true,force:true});}});

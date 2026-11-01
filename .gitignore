@@ -1,0 +1,24 @@
+node_modules/
+dist/
+installer/deps/
+stage/
+*.log
+__pycache__/
+.DS_Store
+Thumbs.db
+tests/.ml-fake/
+.scratch/
+installer/.dl-cache/
+.showcase-dl/
+.panels-build/
+.e2e-logs/
+
+# Gatefold Cloud runtime and external unlicensed adapter
+cloud/private/
+cloud/vendor/
+theme/js/cloud-config.js
+cloud-preview.png
+*-preview.png
+.local-tools/
+*.session.dpapi
+*.part

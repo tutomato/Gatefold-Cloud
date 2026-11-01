@@ -1,0 +1,21 @@
+{
+  "name": "gatefold-cloud",
+  "version": "1.4.5",
+  "private": true,
+  "description": "Gatefold 1.4.5 with unified local, NetEase and QQ Music search",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "check": "node tools/check.mjs",
+    "test": "python tests/e2e.py",
+    "art": "python tools/make_installer_art.py",
+    "test:cloud": "node --test cloud/*.test.mjs cloud/test.mjs",
+    "test:ui": "node tests/cloud-e2e.mjs"
+  },
+  "devDependencies": {
+    "acorn": "8.12.1",
+    "acorn-walk": "8.3.4",
+    "onnxruntime-web": "1.22.0",
+    "playwright": "1.56.1"
+  }
+}

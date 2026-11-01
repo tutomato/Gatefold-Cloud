@@ -1,0 +1,144 @@
+name: CI
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**/*.md', 'docs/**']     # text only: nothing to test
+  pull_request:
+  workflow_dispatch:
+# a newer push to the same pull request makes its older run pointless; every push to main is tested
+concurrency:
+  group: ci-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+permissions:
+  contents: read
+
+jobs:
+  deps:
+    uses: ./.github/workflows/deps-fetch.yml
+  # static checks once (syntax, version, translations, loudness and radio reference checks)
+  checks:
+    name: Checks — syntax, translations, reference values
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: npm }
+      - run: npm ci
+      - run: node tools/check.mjs
+      - name: Plan of the end-to-end parts
+        run: E2E_PLAN=8 python3 tests/e2e.py
+
+  theme:
+    name: Theme — part ${{ matrix.shard }}/8
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions: { contents: write }   # the test output goes to a ci-log-part-<n> branch (below)
+    # every end-to-end test runs on every push, split into eight parts of about the same length
+    # (tests/e2e.py: DURATIONS, longest first into the shortest part); a new test joins a part by itself
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: npm }
+      - run: npm ci                    # onnxruntime-web for the stand-in sound-analysis models
+      - uses: ./.github/actions/chromium
+      - name: End-to-end (headless Chromium, mocked foobar2000 bridge)
+        timeout-minutes: 12
+        env: { SHARD: '${{ matrix.shard }}/8', PYTHONUNBUFFERED: '1' }
+        run: |
+          set -o pipefail
+          python tests/e2e.py 2>&1 | tee e2e.log
+      - name: Remove an old failure log
+        if: success() && github.event_name == 'push'
+        run: git push "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" --delete ci-log-part-${{ matrix.shard }} 2>/dev/null || true
+      # when a part fails, its output goes to the branch ci-log-part-<n> (readable with plain git)
+      - name: Publish the output
+        if: failure() && github.event_name == 'push'
+        run: |
+          mkdir -p /tmp/log && cp e2e.log /tmp/log/ 2>/dev/null || echo "no output" > /tmp/log/e2e.log
+          echo "${{ job.status }} ${GITHUB_SHA} $(date -u +%FT%TZ)" > /tmp/log/STATUS
+          cd /tmp/log && git init -q -b ci-log-part-${{ matrix.shard }}
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "e2e part ${{ matrix.shard }} ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-log-part-${{ matrix.shard }}
+
+  installer:
+    name: Installer — builds
+    runs-on: windows-2022
+    needs: deps
+    permissions: { contents: write }   # the first-start output goes to the ci-log-installer branch
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bundled software (fetched by the deps job)
+        uses: actions/cache/restore@v4
+        with:
+          path: installer/.dl-cache
+          key: deps-${{ hashFiles('installer/deps.lock.json') }}-x1
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - name: Fetch and verify bundled software
+        shell: pwsh
+        env: { GITHUB_TOKEN: '${{ github.token }}' }
+        run: |
+          $lock = Get-Content installer/deps.lock.json | ConvertFrom-Json
+          try { ./installer/fetch-deps.ps1 -Fb2kVersion $lock.foobar2000 -ComponentTag $lock.foo_ui_webview2 *>&1 | Tee-Object -FilePath fetch.log }
+          catch { "ERROR: $($_ | Out-String) $($_.ScriptStackTrace)" | Tee-Object -FilePath fetch.log -Append; throw }
+      - name: Inno Setup 6.6
+        shell: pwsh
+        run: choco upgrade innosetup -y --no-progress
+      - name: Compile
+        shell: pwsh
+        run: |
+          $v = (Get-Content package.json | ConvertFrom-Json).version
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /Qp "/DAppVersion=$v" "/DRepoUrl=${{ github.server_url }}/${{ github.repository }}" installer/gatefold.iss
+      # uploaded before the smoke test, so the installer can be tried by hand even when the test fails
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer-preview
+          path: dist/Gatefold-Setup-*.exe
+          retention-days: 14
+      - name: Silent install smoke test
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem dist/Gatefold-Setup-*.exe | Select-Object -First 1
+          $p = Start-Process $exe.FullName -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/LOG=setup.log' -Wait -PassThru
+          Get-Content setup.log -Tail 40
+          if ($p.ExitCode -ne 0) { throw "setup exit code $($p.ExitCode)" }
+          $prof = Join-Path $env:APPDATA 'foobar2000-v2'
+          foreach ($f in 'webview-ui\default\index.html', 'webview-ui\default\js\i18n.js', 'user-components-x64\foo_ui_webview2\foo_ui_webview2.dll') {
+            if (-not (Test-Path (Join-Path $prof $f))) { throw "missing $f" } else { "ok  $f" }
+          }
+          if (-not (Test-Path "$env:ProgramFiles\foobar2000\foobar2000.exe")) { throw 'foobar2000 was not installed' }
+          (Get-Item "$env:ProgramFiles\foobar2000\foobar2000.exe").VersionInfo.FileVersion
+      - name: First start opens in Gatefold
+        shell: powershell
+        run: |
+          .\tools\first-start-check.ps1 *>&1 | Tee-Object -FilePath first-start.log
+          if (Select-String -Path first-start.log -Pattern '^ok: ' -Quiet) { exit 0 } else { exit 1 }
+      - name: Remove old logs
+        if: success() && github.event_name == 'push'
+        shell: bash
+        run: |
+          for b in ci-log-installer probe-log; do git push "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" --delete $b 2>/dev/null || true; done
+      - name: Publish the output
+        if: failure() && github.event_name == 'push'
+        shell: bash
+        run: |
+          mkdir -p /tmp/log && cp fetch.log first-start.log first-start.png setup.log /tmp/log/ 2>/dev/null || true
+          echo "${{ job.status }} ${GITHUB_SHA} $(date -u +%FT%TZ)" > /tmp/log/STATUS
+          cd /tmp/log && git init -q -b ci-log-installer
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "installer ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-log-installer
+      - name: Setup log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: setup-log
+          path: setup.log
+          if-no-files-found: ignore
+          retention-days: 14
