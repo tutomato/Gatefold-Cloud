@@ -1,8 +1,8 @@
 // Protocol reference: L-1124/QQMusicApi, modules/login.py and models/login.py.
 // Keep QR identifiers and authorization codes on the local service only.
 import { randomBytes } from 'node:crypto';
-import { Credential } from './vendor/qqmusic/src/models/credential.js';
-import { Request } from './vendor/qqmusic/src/models/request.js';
+import { Credential } from './qq-client.mjs';
+import { Request } from './qq-client.mjs';
 
 const appid = 'wx48db31d50e334801';
 export function parseWechatStatus(text) {

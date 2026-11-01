@@ -30,3 +30,7 @@ Downloaded by the theme only when you turn on «Sound analysis (AI)» (not bundl
 | ONNX Runtime Web WebAssembly binary — Microsoft | MIT | https://github.com/microsoft/onnxruntime |
 
 Online services are used only through their public APIs, or — when you turn them on yourself — through unofficial interfaces described in the README. Trademarks belong to their owners. Gatefold is not affiliated with foobar2000, foo_ui_webview2, YouTube/Google, Apple, Deezer, MusicBrainz, LRCLIB, Musixmatch, NetEase, Tencent or Kugou.
+
+## Gatefold Cloud protocol adapters
+
+cloud/qq-client.mjs is a project-owned MIT implementation of the limited QQ Music HTTP operations used here. No code from Suxiaoqinx/QQMusicapi is distributed or required. Endpoint behavior was investigated using public interfaces and compatibility testing; prior implementations were read, so this is not a clean-room claim. The protocol and service remain controlled by Tencent.

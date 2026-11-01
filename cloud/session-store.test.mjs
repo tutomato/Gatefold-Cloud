@@ -4,7 +4,7 @@ import { mkdtemp, readFile, readdir, unlink, rmdir } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { Providers } from './providers.mjs';
-import { Credential } from './vendor/qqmusic/src/models/credential.js';
+import { Credential } from './qq-client.mjs';
 
 test('Windows encrypted sessions survive provider restart; logout removes only selected account', {skip:process.platform!=='win32'}, async t => {
   const dir=await mkdtemp(path.join(os.tmpdir(),'gatefold-session-test-'));

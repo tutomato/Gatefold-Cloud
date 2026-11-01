@@ -15,7 +15,7 @@ Windows 上基于 [Gatefold v1.4.5](https://github.com/DEVIROYrus/gatefold-fooba
 需要 Windows 10/11、Node.js 22 或更新的 LTS、64 位 foobar2000、foo_ui_webview2，以及 Chrome 或 Edge（网易云网页登录）。
 
 1. 下载本项目，保留目录位置。
-2. 在 PowerShell 执行 ./Setup.ps1 -IncludeQQAdapter（见下方依赖授权说明）。
+2. 在 PowerShell 执行 ./Setup.ps1。
 3. 双击 Start-Cloud.cmd；在 foobar2000 Preferences → Display → WebView2 UI 选择 gatefold-cloud 模板。
 4. Preferences → Advanced → Tools → WebView UI 启用 Allow local network access，供主题连接本机服务。
 5. 在设置 → 在线音乐与下载中配置目录；在线音乐页管理登录，顶部输入后按 Enter 搜索。
@@ -24,7 +24,7 @@ Windows 上基于 [Gatefold v1.4.5](https://github.com/DEVIROYrus/gatefold-fooba
 
 ## 第三方依赖与许可
 
-Gatefold 原始 MIT LICENSE 和第三方声明保留。QQ 适配依赖 [Suxiaoqinx/QQMusicapi](https://github.com/Suxiaoqinx/QQMusicapi)，其当前快照没有声明许可证，因此本仓库不分发该代码。Setup.ps1 的 IncludeQQAdapter 选项从其仓库下载固定提交到被 Git 忽略的 cloud/vendor/qqmusic。当前服务需要该适配器才能启动；安装者应自行确认其使用权限，勿将下载副本随本项目重新分发。其他依赖许可见各包；微信协议参考 L-1124/QQMusicApi，网页登录流程参考 imsyy/SPlayer。
+Gatefold 原始 MIT LICENSE 和第三方声明保留。QQ 接入现由 cloud/qq-client.mjs 直接实现所需 HTTP 协议，不再依赖或下载 Suxiaoqinx/QQMusicapi。该新增实现采用 MIT 许可证。接口参数和交互行为参考公开协议及兼容性测试；作者曾阅读其他实现，因此不宣称隔离开发。微信协议参考 L-1124/QQMusicApi，网易云网页登录流程参考 imsyy/SPlayer；不包含这些项目的 SDK 实现。其他依赖许可见各包。
 
 ## 隐私与限制
 

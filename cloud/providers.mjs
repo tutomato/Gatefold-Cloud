@@ -1,7 +1,7 @@
 import netease from 'NeteaseCloudMusicApi';
-import { Client } from './vendor/qqmusic/src/client.js';
-import { Credential } from './vendor/qqmusic/src/models/credential.js';
-import { Request } from './vendor/qqmusic/src/models/request.js';
+import { Client } from './qq-client.mjs';
+import { Credential } from './qq-client.mjs';
+import { Request } from './qq-client.mjs';
 import { WechatLogin } from './wechat-login.mjs';
 import { SessionStore } from './session-store.mjs';
 import { NeteaseWebLogin } from './netease-web-login.mjs';
@@ -147,7 +147,7 @@ export class Providers {
         const r = await this.qq.user.getUserSonglist(this.qq.credential.strMusicid || String(this.qq.credential.musicid), p.page, 30);
         const list = r.v_playlist || r.list || r.songlist || [];
         if (!Array.isArray(list)) throw new Error('QQ 歌单响应格式发生变化，需要更新接入');
-        return { playlists: list.map(x => ({ id: String(x.tid || x.dissid || x.id), name: x.diss_name || x.dissname || x.name, count: x.song_cnt || x.songnum || 0 })) };
+        return { playlists: list.map(x => ({ id: String(x.tid || x.dissid || x.id), name: x.dirName || x.diss_name || x.dissname || x.name, count: x.songNum || x.song_cnt || x.songnum || 0 })) };
       }
       case 'playlist': {
         const r = await this.qq.execute(new Request({ _client: this.qq, module: 'music.srfDissInfo.DissInfo', method: 'CgiGetDiss', param: { disstid: Number(p.id), dirid: 0, tag: false, song_begin: (p.page - 1) * 30, song_num: 30, userinfo: false, orderlist: true, onlysonglist: true } }));
